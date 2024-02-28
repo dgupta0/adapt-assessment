@@ -18,18 +18,26 @@ const Table = () => {
   const [rowsPerPage] = useState(5);
 
   const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = data.slice(indexOfFirstRow, indexOfLastRow);
+  const indexOfFirstRow = (currentPage - 1) * rowsPerPage;
 
   const handleSelect = (status) => {
     setSelectedStatus(status);
     console.log(status);
     const newData = data.filter((el) => el.status === status);
     setFilteredData(newData);
+    setCurrentPage(1);
   };
   const handleRefresh = () => {
     setFilteredData(data);
     setSelectedStatus("");
+    setCurrentPage(1);
+  };
+  const handleBack = () => {
+    setCurrentPage((page) => page - 1);
+  };
+
+  const handleForward = () => {
+    setCurrentPage((page) => page + 1);
   };
 
   const renderStatus = status.map((s) => (
@@ -41,26 +49,28 @@ const Table = () => {
       {s}
     </li>
   ));
-  const renderTableBody = filteredData.map((el) => (
-    <tr key={el.orderNo}>
-      <td>
-        <img
-          className="channel-icon"
-          src={el.channel}
-          alt="image from freepik"
-        />
-      </td>
-      <td>{el.orderNo}</td>
-      <td>{el.orderDate}</td>
-      <td>{el.city}</td>
-      <td>{el.customerName}</td>
-      <td>{el.orderValue}</td>
-      <td>{el.status}</td>
-      <td className="operation">
-        {el.operation} <img src={down} alt="img by freepik" />
-      </td>
-    </tr>
-  ));
+  const renderTableBody = filteredData
+    .slice(indexOfFirstRow, indexOfLastRow)
+    .map((el) => (
+      <tr key={el.orderNo}>
+        <td>
+          <img
+            className="channel-icon"
+            src={el.channel}
+            alt="image from freepik"
+          />
+        </td>
+        <td>{el.orderNo}</td>
+        <td>{el.orderDate}</td>
+        <td>{el.city}</td>
+        <td>{el.customerName}</td>
+        <td>{el.orderValue}</td>
+        <td>{el.status}</td>
+        <td className="operation">
+          {el.operation} <img src={down} alt="img by freepik" />
+        </td>
+      </tr>
+    ));
   return (
     <div className="table-ctn">
       <section className="category">
@@ -81,7 +91,7 @@ const Table = () => {
           </button>
         </div>
         <div className="table-content">
-          <table class>
+          <table>
             <thead>
               <tr className="thead">
                 <th>Channel</th>
@@ -98,9 +108,21 @@ const Table = () => {
           </table>
         </div>
         <div className="pagination">
-          <button>{"<"}</button>
-          <p>{currentPage}</p>
-          <button>{">"}</button>
+          <button disabled={currentPage === 1} onClick={handleBack}>
+            {"<"}
+          </button>
+          <p className="current-page">{currentPage}</p>
+          <button
+            onClick={handleForward}
+            disabled={
+              currentPage === Math.ceil(filteredData.length / rowsPerPage)
+            }
+          >
+            {">"}
+          </button>
+          <button className="per-page">
+            5 / page <img className="down" src={down} alt="down arrow" />
+          </button>
         </div>
       </div>
     </div>
